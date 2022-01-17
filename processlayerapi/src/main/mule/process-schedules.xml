@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="process-schedulesFlow1" doc:id="1b030104-1931-432c-a662-e6690a3e3e5c" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="78c462a3-ba1c-4d30-a4f9-24a4abe547de" >
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="b26fd044-4dd1-41cc-85ad-bc29357d09a9" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	TransactionId : attributes.headers.Transactionid,&#10;	"departureLocationCode" : attributes.queryParams.departureLocationCode,&#10;	"destinationLocationCode" : attributes.queryParams.destinationLocationCode,&#10;	"transportCompany" : attributes.queryParams.companyName,&#10;	"transportType" : attributes.uriParams.transportType&#10;}]'/>
+				<http:request method="GET" doc:name="Request-fastGo-schedules" doc:id="85cb2d73-ecd9-4948-832d-b35dbe9cae1e" url="http://localhost:8089/api/{transportType}/{transportCompany}/schedules" responseTimeout="50000">
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	TransactionId : attributes.headers.TransactionId
+}]]]></http:headers>
+					<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"transportCompany" :  attributes.queryParams.companyName default 'fastgo',
+	"transportType" : attributes.uriParams.transportType
+}]]]></http:uri-params>
+					<http:query-params><![CDATA[#[output application/java
+---
+{
+	"departureLocationCode" : attributes.queryParams.departureLocationCode,
+	"destinationLocationCode" : attributes.queryParams.destinationLocationCode
+}]]]></http:query-params>
+				</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="4035671d-5b02-4119-9e62-c58355ef843d">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="552691e5-7fd9-454f-8751-39db2d5a2885" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	TransactionId : attributes.headers.Transactionid,&#10;	"departureLocationCode" : attributes.queryParams.departureLocationCode,&#10;	"destinationLocationCode" : attributes.queryParams.destinationLocationCode,&#10;	"transportCompany" : attributes.queryParams.companyName,&#10;	"transportType" : attributes.uriParams.transportType&#10;}]'/>
+				<http:request method="GET" doc:name="Request-TravelonTip-schedules" doc:id="5218de26-d520-44ea-ad13-6f833b747bfb" url="http://localhost:8084/api/{transportType}/{transportCompany}/schedules" responseTimeout="50000">
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	TransactionId : attributes.headers.TransactionId
+}]]]></http:headers>
+					<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"transportCompany" : attributes.queryParams.companyName default 'travelontip',
+	"transportType" : attributes.uriParams.transportType
+}]]]></http:uri-params>
+					<http:query-params><![CDATA[#[output application/java
+---
+{
+	"departureLocationCode" : attributes.queryParams.departureLocationCode,
+	"destinationLocationCode" : attributes.queryParams.destinationLocationCode
+}]]]></http:query-params>
+				</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="12e054b7-7e75-4c11-a545-4e60b32a248f">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="fb3822f6-c4cf-4b76-9c18-3322d5041d88">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload..payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
